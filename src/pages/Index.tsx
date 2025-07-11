@@ -1,75 +1,59 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trash2, FileText, Users, Settings } from 'lucide-react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ClienteForm } from '@/components/ClienteForm';
 import { TipoServicoForm } from '@/components/TipoServicoForm';
 import { ContratoForm } from '@/components/ContratoForm';
 import { ImportClientes } from '@/components/ImportClientes';
 import { ContratoPDF } from '@/components/ContratoPDF';
-import { Cliente, TipoServico, Contrato } from '@/types/contract';
-import { toast } from 'sonner';
+import { useClientes, useAddCliente, useDeleteCliente, useImportClientes } from '@/hooks/useClientes';
+import { useTiposServico, useAddTipoServico, useDeleteTipoServico } from '@/hooks/useTiposServico';
+import { useContratos, useAddContrato, useDeleteContrato } from '@/hooks/useContratos';
 
 const Index = () => {
-  const [clientes, setClientes] = useLocalStorage<Cliente[]>('clientes', []);
-  const [tiposServico, setTiposServico] = useLocalStorage<TipoServico[]>('tiposServico', []);
-  const [contratos, setContratos] = useLocalStorage<Contrato[]>('contratos', []);
+  const { data: clientes = [], isLoading: clientesLoading } = useClientes();
+  const { data: tiposServico = [], isLoading: tiposLoading } = useTiposServico();
+  const { data: contratos = [], isLoading: contratosLoading } = useContratos();
 
-  const addCliente = (clienteData: Omit<Cliente, 'id' | 'createdAt'>) => {
-    const novoCliente: Cliente = {
-      ...clienteData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setClientes([...clientes, novoCliente]);
-    toast.success('Cliente cadastrado com sucesso!');
+  const addClienteMutation = useAddCliente();
+  const deleteClienteMutation = useDeleteCliente();
+  const importClientesMutation = useImportClientes();
+
+  const addTipoServicoMutation = useAddTipoServico();
+  const deleteTipoServicoMutation = useDeleteTipoServico();
+
+  const addContratoMutation = useAddContrato();
+  const deleteContratoMutation = useDeleteContrato();
+
+  const handleAddCliente = (clienteData: any) => {
+    addClienteMutation.mutate(clienteData);
   };
 
-  const addTipoServico = (tipoServicoData: Omit<TipoServico, 'id' | 'createdAt'>) => {
-    const novoTipoServico: TipoServico = {
-      ...tipoServicoData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setTiposServico([...tiposServico, novoTipoServico]);
-    toast.success('Tipo de serviço cadastrado com sucesso!');
+  const handleImportClientes = (clientesImportados: any[]) => {
+    importClientesMutation.mutate(clientesImportados);
   };
 
-  const addContrato = (contratoData: Omit<Contrato, 'id' | 'createdAt'>) => {
-    const novoContrato: Contrato = {
-      ...contratoData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setContratos([...contratos, novoContrato]);
-    toast.success('Contrato gerado com sucesso!');
+  const handleDeleteCliente = (id: string) => {
+    deleteClienteMutation.mutate(id);
   };
 
-  const importClientes = (clientesImportados: Omit<Cliente, 'id' | 'createdAt'>[]) => {
-    const novosClientes: Cliente[] = clientesImportados.map(cliente => ({
-      ...cliente,
-      id: Date.now().toString() + Math.random(),
-      createdAt: new Date(),
-    }));
-    setClientes([...clientes, ...novosClientes]);
-    toast.success(`${novosClientes.length} clientes importados com sucesso!`);
+  const handleAddTipoServico = (tipoServicoData: any) => {
+    addTipoServicoMutation.mutate(tipoServicoData);
   };
 
-  const deleteCliente = (id: string) => {
-    setClientes(clientes.filter(c => c.id !== id));
-    toast.success('Cliente removido com sucesso!');
+  const handleDeleteTipoServico = (id: string) => {
+    deleteTipoServicoMutation.mutate(id);
   };
 
-  const deleteTipoServico = (id: string) => {
-    setTiposServico(tiposServico.filter(t => t.id !== id));
-    toast.success('Tipo de serviço removido com sucesso!');
+  const handleAddContrato = (contratoData: any) => {
+    addContratoMutation.mutate(contratoData);
   };
 
-  const deleteContrato = (id: string) => {
-    setContratos(contratos.filter(c => c.id !== id));
-    toast.success('Contrato removido com sucesso!');
+  const handleDeleteContrato = (id: string) => {
+    deleteContratoMutation.mutate(id);
   };
 
   return (
@@ -106,8 +90,8 @@ const Index = () => {
 
           <TabsContent value="clientes" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ClienteForm onSubmit={addCliente} />
-              <ImportClientes onImport={importClientes} />
+              <ClienteForm onSubmit={handleAddCliente} />
+              <ImportClientes onImport={handleImportClientes} />
             </div>
 
             <Card>
@@ -115,65 +99,75 @@ const Index = () => {
                 <CardTitle>Clientes Cadastrados ({clientes.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {clientes.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
-                      Nenhum cliente cadastrado ainda.
-                    </p>
-                  ) : (
-                    clientes.map((cliente) => (
-                      <div key={cliente.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <h3 className="font-semibold">{cliente.razaoSocial}</h3>
-                          <p className="text-sm text-muted-foreground">CNPJ: {cliente.cnpj}</p>
+                {clientesLoading ? (
+                  <p className="text-center py-8">Carregando clientes...</p>
+                ) : (
+                  <div className="space-y-4">
+                    {clientes.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">
+                        Nenhum cliente cadastrado ainda.
+                      </p>
+                    ) : (
+                      clientes.map((cliente) => (
+                        <div key={cliente.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <h3 className="font-semibold">{cliente.razaoSocial}</h3>
+                            <p className="text-sm text-muted-foreground">CNPJ: {cliente.cnpj}</p>
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteCliente(cliente.id)}
+                            disabled={deleteClienteMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => deleteCliente(cliente.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="servicos" className="space-y-6">
-            <TipoServicoForm onSubmit={addTipoServico} />
+            <TipoServicoForm onSubmit={handleAddTipoServico} />
 
             <Card>
               <CardHeader>
                 <CardTitle>Tipos de Serviço Cadastrados ({tiposServico.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {tiposServico.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
-                      Nenhum tipo de serviço cadastrado ainda.
-                    </p>
-                  ) : (
-                    tiposServico.map((tipo) => (
-                      <div key={tipo.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <h3 className="font-semibold">{tipo.nome}</h3>
-                          <p className="text-sm text-muted-foreground">{tipo.descricao}</p>
-                          <p className="text-sm font-medium">Valor Base: R$ {tipo.valorBase.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                {tiposLoading ? (
+                  <p className="text-center py-8">Carregando tipos de serviço...</p>
+                ) : (
+                  <div className="space-y-4">
+                    {tiposServico.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">
+                        Nenhum tipo de serviço cadastrado ainda.
+                      </p>
+                    ) : (
+                      tiposServico.map((tipo) => (
+                        <div key={tipo.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <h3 className="font-semibold">{tipo.nome}</h3>
+                            <p className="text-sm text-muted-foreground">{tipo.descricao}</p>
+                            <p className="text-sm font-medium">Valor Base: R$ {tipo.valorBase.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteTipoServico(tipo.id)}
+                            disabled={deleteTipoServicoMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => deleteTipoServico(tipo.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -196,7 +190,7 @@ const Index = () => {
             ) : (
               <ContratoForm
                 clientes={clientes}
-                onSubmit={addContrato}
+                onSubmit={handleAddContrato}
               />
             )}
           </TabsContent>
@@ -207,48 +201,53 @@ const Index = () => {
                 <CardTitle>Contratos Gerados ({contratos.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {contratos.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
-                      Nenhum contrato gerado ainda.
-                    </p>
-                  ) : (
-                    contratos.map((contrato) => {
-                      const cliente = clientes.find(c => c.id === contrato.clienteId);
-                      const tipoServico = tiposServico.find(t => t.id === contrato.tipoServicoId);
-                      
-                      return (
-                        <div key={contrato.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <h3 className="font-semibold">{cliente?.razaoSocial || 'Cliente não encontrado'}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Serviço: {tipoServico?.nome || 'Serviço não encontrado'}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Valor: R$ {contrato.valorMensalidade.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </p>
+                {contratosLoading ? (
+                  <p className="text-center py-8">Carregando contratos...</p>
+                ) : (
+                  <div className="space-y-4">
+                    {contratos.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">
+                        Nenhum contrato gerado ainda.
+                      </p>
+                    ) : (
+                      contratos.map((contrato) => {
+                        const cliente = clientes.find(c => c.id === contrato.clienteId);
+                        const tipoServico = tiposServico.find(t => t.id === contrato.tipoServicoId);
+                        
+                        return (
+                          <div key={contrato.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <h3 className="font-semibold">{cliente?.razaoSocial || 'Cliente não encontrado'}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                Serviço: {tipoServico?.nome || 'Serviço não encontrado'}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Valor: R$ {contrato.valorMensalidade.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {cliente && tipoServico && (
+                                <ContratoPDF
+                                  contrato={contrato}
+                                  cliente={cliente}
+                                  tipoServico={tipoServico}
+                                />
+                              )}
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteContrato(contrato.id)}
+                                disabled={deleteContratoMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {cliente && tipoServico && (
-                              <ContratoPDF
-                                contrato={contrato}
-                                cliente={cliente}
-                                tipoServico={tipoServico}
-                              />
-                            )}
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => deleteContrato(contrato.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
