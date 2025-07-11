@@ -2,22 +2,33 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2, Settings } from 'lucide-react';
-import { useStore } from '@/store/useStore';
+import { useTiposServico, useAddTipoServico, useDeleteTipoServico } from '@/hooks/useTiposServico';
 import { TipoServicoForm } from '@/components/TipoServicoForm';
 import { toast } from 'sonner';
 
 export function Servicos() {
-  const { tiposServico, addTipoServico, deleteTipoServico } = useStore();
+  const { data: tiposServico = [], isLoading } = useTiposServico();
+  const addTipoServicoMutation = useAddTipoServico();
+  const deleteTipoServicoMutation = useDeleteTipoServico();
 
   const handleAddTipoServico = (tipoServicoData: any) => {
-    addTipoServico(tipoServicoData);
-    toast.success('Tipo de serviço cadastrado com sucesso!');
+    addTipoServicoMutation.mutate(tipoServicoData);
   };
 
   const handleDeleteTipoServico = (id: string) => {
-    deleteTipoServico(id);
-    toast.success('Tipo de serviço removido com sucesso!');
+    deleteTipoServicoMutation.mutate(id);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Tipos de Serviço</h1>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -53,6 +64,7 @@ export function Servicos() {
                     variant="destructive"
                     size="sm"
                     onClick={() => handleDeleteTipoServico(tipo.id)}
+                    disabled={deleteTipoServicoMutation.isPending}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

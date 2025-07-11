@@ -81,6 +81,48 @@ export function useAddCliente() {
   });
 }
 
+export function useUpdateCliente() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (cliente: Partial<Cliente> & { id: string }) => {
+      console.log('✏️ Atualizando cliente no Supabase:', cliente);
+      const { data, error } = await supabase
+        .from('clientes')
+        .update({
+          razao_social: cliente.razaoSocial,
+          cnpj: cliente.cnpj,
+          endereco: cliente.endereco,
+          representante_nome: cliente.representanteNome,
+          representante_nacionalidade: cliente.representanteNacionalidade,
+          representante_estado_civil: cliente.representanteEstadoCivil,
+          representante_profissao: cliente.representanteProfissao,
+          representante_cpf: cliente.representanteCpf,
+          representante_rg: cliente.representanteRg,
+          representante_orgao_emissor: cliente.representanteOrgaoEmissor,
+        })
+        .eq('id', cliente.id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('❌ Erro ao atualizar cliente:', error);
+        throw error;
+      }
+      console.log('✅ Cliente atualizado com sucesso no Supabase:', data);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      toast.success('Cliente atualizado com sucesso no Supabase!');
+    },
+    onError: (error) => {
+      console.error('❌ Erro ao atualizar cliente:', error);
+      toast.error('Erro ao atualizar cliente no Supabase');
+    },
+  });
+}
+
 export function useDeleteCliente() {
   const queryClient = useQueryClient();
   
