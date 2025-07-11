@@ -70,7 +70,7 @@ export function ContratoPDF({ contrato, cliente, tipoServico }: ContratoPDFProps
                  section.startsWith('CLÁUSULA') ||
                  section.includes('ANEXO I')) {
         pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont('helvetica', 'Light');
         yPosition = addText(section, margin, yPosition, pageWidth - 2 * margin);
         yPosition += 5;
       } else {
