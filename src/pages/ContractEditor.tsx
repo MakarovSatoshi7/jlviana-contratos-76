@@ -35,7 +35,7 @@ export function ContractEditor() {
   if (clientes.length === 0) {
     return <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Editor de Contratos</h1>
+          <h1 className="font-light text-2xl">Editor de Contratos</h1>
           <p className="text-muted-foreground">Crie contratos com preview em tempo real</p>
         </div>
         
