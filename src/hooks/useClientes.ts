@@ -8,18 +8,18 @@ export function useClientes() {
   return useQuery({
     queryKey: ['clientes'],
     queryFn: async () => {
-      console.log('Buscando clientes do Supabase...');
+      console.log('🔍 Buscando clientes do Supabase...');
       const { data, error } = await supabase
         .from('clientes')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('Erro ao buscar clientes:', error);
+        console.error('❌ Erro ao buscar clientes:', error);
         throw error;
       }
       
-      console.log('Dados recebidos do Supabase:', data);
+      console.log(`✅ ${data.length} clientes encontrados no Supabase:`, data);
       
       // Transform Supabase data to match our Cliente type
       return data.map(cliente => ({
@@ -45,7 +45,7 @@ export function useAddCliente() {
   
   return useMutation({
     mutationFn: async (cliente: Omit<Cliente, 'id' | 'createdAt'>) => {
-      console.log('Adicionando cliente no Supabase:', cliente);
+      console.log('➕ Adicionando cliente no Supabase:', cliente);
       const { data, error } = await supabase
         .from('clientes')
         .insert({
@@ -64,19 +64,19 @@ export function useAddCliente() {
         .single();
       
       if (error) {
-        console.error('Erro ao inserir cliente:', error);
+        console.error('❌ Erro ao inserir cliente:', error);
         throw error;
       }
-      console.log('Cliente inserido com sucesso:', data);
+      console.log('✅ Cliente inserido com sucesso no Supabase:', data);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      toast.success('Cliente cadastrado com sucesso!');
+      toast.success('Cliente cadastrado com sucesso no Supabase!');
     },
     onError: (error) => {
-      console.error('Erro ao cadastrar cliente:', error);
-      toast.error('Erro ao cadastrar cliente');
+      console.error('❌ Erro ao cadastrar cliente:', error);
+      toast.error('Erro ao cadastrar cliente no Supabase');
     },
   });
 }
@@ -86,25 +86,25 @@ export function useDeleteCliente() {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      console.log('Deletando cliente:', id);
+      console.log('🗑️ Deletando cliente do Supabase:', id);
       const { error } = await supabase
         .from('clientes')
         .delete()
         .eq('id', id);
       
       if (error) {
-        console.error('Erro ao deletar cliente:', error);
+        console.error('❌ Erro ao deletar cliente:', error);
         throw error;
       }
-      console.log('Cliente deletado com sucesso');
+      console.log('✅ Cliente deletado com sucesso do Supabase');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      toast.success('Cliente removido com sucesso!');
+      toast.success('Cliente removido com sucesso do Supabase!');
     },
     onError: (error) => {
-      console.error('Erro ao remover cliente:', error);
-      toast.error('Erro ao remover cliente');
+      console.error('❌ Erro ao remover cliente:', error);
+      toast.error('Erro ao remover cliente do Supabase');
     },
   });
 }
@@ -114,22 +114,27 @@ export function useImportClientes() {
   
   return useMutation({
     mutationFn: async (clientes: Omit<Cliente, 'id' | 'createdAt'>[]) => {
-      console.log('Iniciando importação de clientes:', clientes.length);
+      console.log('📥 INICIANDO IMPORTAÇÃO NO SUPABASE');
+      console.log(`🔢 Quantidade de clientes a importar: ${clientes.length}`);
+      console.log('📋 Dados dos clientes:', clientes);
       
-      const clientesData = clientes.map(cliente => ({
-        razao_social: cliente.razaoSocial,
-        cnpj: cliente.cnpj,
-        endereco: cliente.endereco || null,
-        representante_nome: cliente.representanteNome || null,
-        representante_nacionalidade: cliente.representanteNacionalidade || null,
-        representante_estado_civil: cliente.representanteEstadoCivil || null,
-        representante_profissao: cliente.representanteProfissao || null,
-        representante_cpf: cliente.representanteCpf || null,
-        representante_rg: cliente.representanteRg || null,
-        representante_orgao_emissor: cliente.representanteOrgaoEmissor || null,
-      }));
+      const clientesData = clientes.map((cliente, index) => {
+        console.log(`🔄 Processando cliente ${index + 1}:`, cliente);
+        return {
+          razao_social: cliente.razaoSocial,
+          cnpj: cliente.cnpj,
+          endereco: cliente.endereco || null,
+          representante_nome: cliente.representanteNome || null,
+          representante_nacionalidade: cliente.representanteNacionalidade || null,
+          representante_estado_civil: cliente.representanteEstadoCivil || null,
+          representante_profissao: cliente.representanteProfissao || null,
+          representante_cpf: cliente.representanteCpf || null,
+          representante_rg: cliente.representanteRg || null,
+          representante_orgao_emissor: cliente.representanteOrgaoEmissor || null,
+        };
+      });
       
-      console.log('Dados preparados para inserção:', clientesData);
+      console.log('📊 Dados preparados para inserção no Supabase:', clientesData);
       
       const { data, error } = await supabase
         .from('clientes')
@@ -137,20 +142,23 @@ export function useImportClientes() {
         .select();
       
       if (error) {
-        console.error('Erro na importação:', error);
+        console.error('❌ ERRO NA IMPORTAÇÃO SUPABASE:', error);
+        console.error('❌ Detalhes do erro:', error.message, error.details, error.hint);
         throw error;
       }
       
-      console.log('Importação concluída com sucesso:', data);
+      console.log('✅ IMPORTAÇÃO CONCLUÍDA COM SUCESSO NO SUPABASE!');
+      console.log(`✅ ${data.length} clientes importados:`, data);
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      toast.success(`${data.length} clientes importados com sucesso!`);
+      console.log('🔄 Cache invalidado, dados atualizados');
+      toast.success(`${data.length} clientes importados com sucesso no Supabase!`);
     },
     onError: (error) => {
-      console.error('Erro ao importar clientes:', error);
-      toast.error('Erro ao importar clientes');
+      console.error('❌ ERRO FINAL NA IMPORTAÇÃO:', error);
+      toast.error('Erro ao importar clientes no Supabase');
     },
   });
 }
