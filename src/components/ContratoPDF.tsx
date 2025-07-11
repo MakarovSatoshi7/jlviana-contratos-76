@@ -36,6 +36,7 @@ export function ContratoPDF({ contrato, cliente, tipoServico }: ContratoPDFProps
     const pdf = new jsPDF();
     const pageWidth = pdf.internal.pageSize.width;
     
+    // --- ALTERAÇÕES DE MARGEM ---
     // Margens padrão para contrato (base ABNT: 3cm esquerda, 2cm direita)
     // 1 cm = ~28.35 pontos no jsPDF
     const marginLeft = 85; // Aprox. 3cm
@@ -43,20 +44,14 @@ export function ContratoPDF({ contrato, cliente, tipoServico }: ContratoPDFProps
     const lineHeight = 7; // Aumentado um pouco para o novo tamanho da fonte
     let yPosition = 20;
 
-    // --- CORREÇÃO DE ALINHAMENTO ---
     // Helper function to add text with word wrap
     const addText = (text: string, x: number, y: number, maxWidth: number, align: 'left' | 'center' = 'left') => {
       const lines = pdf.splitTextToSize(text, maxWidth);
-      const textOptions: { align?: 'center' | 'left' } = {}; // Objeto de opções para o jsPDF
-
       if (align === 'center') {
-        // Para centralizar, definimos o ponto x como o centro da página
-        // e passamos a opção de alinhamento para a função text().
-        x = pageWidth / 2; 
-        textOptions.align = 'center';
+        // O alinhamento central não usa as margens laterais
+        x = (pageWidth - maxWidth) / 2;
       }
-      // A função text() do jsPDF aceita um objeto de opções como último parâmetro
-      pdf.text(lines, x, y, textOptions);
+      pdf.text(lines, x, y);
       return y + (lines.length * lineHeight);
     };
 
@@ -70,12 +65,12 @@ export function ContratoPDF({ contrato, cliente, tipoServico }: ContratoPDFProps
         yPosition = 20;
       }
 
-      const contentWidth = pageWidth - marginLeft - marginRight;
+      // --- ALTERAÇÕES DE FONTE E TAMANHO ---
+      const contentWidth = pageWidth - marginLeft - marginRight;
 
       if (section.includes('CONTRATO DE PRESTAÇÃO DE SERVIÇOS CONTÁBEIS')) {
-        pdf.setFontSize(18); 
-        pdf.setFont('helvetica', 'light'); 
-        // A chamada aqui permanece a mesma, pois a lógica de centralização foi corrigida na função addText
+        pdf.setFontSize(18); // Tamanho do título aumentado
+        pdf.setFont('helvetica', 'light'); // Helvetica é o padrão para Arial
         yPosition = addText(section, 0, yPosition, pageWidth, 'center');
         yPosition += 10;
       } else if (section.includes('CONTRATANTE:') || 
@@ -83,7 +78,7 @@ export function ContratoPDF({ contrato, cliente, tipoServico }: ContratoPDFProps
                  section.startsWith('CLÁUSULA') ||
                  section.includes('ANEXO I')) {
         pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'light');
+        pdf.setFont('helvetica', 'light'); // Corrigido para 'light' minúsculo
         yPosition = addText(section, marginLeft, yPosition, contentWidth);
         yPosition += 5;
       } else {
