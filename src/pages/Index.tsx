@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,14 +28,17 @@ const Index = () => {
   const deleteContratoMutation = useDeleteContrato();
 
   const handleAddCliente = (clienteData: any) => {
+    console.log('Adicionando cliente:', clienteData);
     addClienteMutation.mutate(clienteData);
   };
 
   const handleImportClientes = (clientesImportados: any[]) => {
+    console.log('Importando clientes via Supabase:', clientesImportados);
     importClientesMutation.mutate(clientesImportados);
   };
 
   const handleDeleteCliente = (id: string) => {
+    console.log('Deletando cliente:', id);
     deleteClienteMutation.mutate(id);
   };
 
@@ -113,6 +115,12 @@ const Index = () => {
                           <div>
                             <h3 className="font-semibold">{cliente.razaoSocial}</h3>
                             <p className="text-sm text-muted-foreground">CNPJ: {cliente.cnpj}</p>
+                            {cliente.endereco && (
+                              <p className="text-sm text-muted-foreground">Endereço: {cliente.endereco}</p>
+                            )}
+                            {cliente.representanteNome && (
+                              <p className="text-sm text-muted-foreground">Representante: {cliente.representanteNome}</p>
+                            )}
                           </div>
                           <Button
                             variant="destructive"

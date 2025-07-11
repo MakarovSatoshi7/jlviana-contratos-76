@@ -8,12 +8,18 @@ export function useClientes() {
   return useQuery({
     queryKey: ['clientes'],
     queryFn: async () => {
+      console.log('Buscando clientes do Supabase...');
       const { data, error } = await supabase
         .from('clientes')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar clientes:', error);
+        throw error;
+      }
+      
+      console.log('Dados recebidos do Supabase:', data);
       
       // Transform Supabase data to match our Cliente type
       return data.map(cliente => ({
@@ -39,6 +45,7 @@ export function useAddCliente() {
   
   return useMutation({
     mutationFn: async (cliente: Omit<Cliente, 'id' | 'createdAt'>) => {
+      console.log('Adicionando cliente no Supabase:', cliente);
       const { data, error } = await supabase
         .from('clientes')
         .insert({
@@ -56,7 +63,11 @@ export function useAddCliente() {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao inserir cliente:', error);
+        throw error;
+      }
+      console.log('Cliente inserido com sucesso:', data);
       return data;
     },
     onSuccess: () => {
@@ -75,12 +86,17 @@ export function useDeleteCliente() {
   
   return useMutation({
     mutationFn: async (id: string) => {
+      console.log('Deletando cliente:', id);
       const { error } = await supabase
         .from('clientes')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao deletar cliente:', error);
+        throw error;
+      }
+      console.log('Cliente deletado com sucesso');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
@@ -98,25 +114,34 @@ export function useImportClientes() {
   
   return useMutation({
     mutationFn: async (clientes: Omit<Cliente, 'id' | 'createdAt'>[]) => {
+      console.log('Iniciando importação de clientes:', clientes.length);
+      
       const clientesData = clientes.map(cliente => ({
         razao_social: cliente.razaoSocial,
         cnpj: cliente.cnpj,
-        endereco: cliente.endereco,
-        representante_nome: cliente.representanteNome,
-        representante_nacionalidade: cliente.representanteNacionalidade,
-        representante_estado_civil: cliente.representanteEstadoCivil,
-        representante_profissao: cliente.representanteProfissao,
-        representante_cpf: cliente.representanteCpf,
-        representante_rg: cliente.representanteRg,
-        representante_orgao_emissor: cliente.representanteOrgaoEmissor,
+        endereco: cliente.endereco || null,
+        representante_nome: cliente.representanteNome || null,
+        representante_nacionalidade: cliente.representanteNacionalidade || null,
+        representante_estado_civil: cliente.representanteEstadoCivil || null,
+        representante_profissao: cliente.representanteProfissao || null,
+        representante_cpf: cliente.representanteCpf || null,
+        representante_rg: cliente.representanteRg || null,
+        representante_orgao_emissor: cliente.representanteOrgaoEmissor || null,
       }));
+      
+      console.log('Dados preparados para inserção:', clientesData);
       
       const { data, error } = await supabase
         .from('clientes')
         .insert(clientesData)
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro na importação:', error);
+        throw error;
+      }
+      
+      console.log('Importação concluída com sucesso:', data);
       return data;
     },
     onSuccess: (data) => {
