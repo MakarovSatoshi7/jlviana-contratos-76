@@ -10,6 +10,7 @@ import { useUpdateCliente } from '@/hooks/useClientes';
 import { toast } from 'sonner';
 interface ContratoFormProps {
   clientes: Cliente[];
+  tiposServico: TipoServico[];
   onSubmit: (contrato: Omit<Contrato, 'id' | 'createdAt'>) => void;
   onChange?: (data: Partial<Contrato>) => void;
   showSaveButton?: boolean;
@@ -54,6 +55,7 @@ const initialFormData: Omit<Contrato, 'id' | 'createdAt'> = {
 };
 export function ContratoForm({
   clientes,
+  tiposServico,
   onSubmit,
   onChange,
   showSaveButton = false
@@ -163,7 +165,16 @@ export function ContratoForm({
     if (onChange) {
       onChange(formData);
     }
+    // Log para depuração
+    console.log('DEBUG tipoServicoId:', formData.tipoServicoId);
   }, [formData, onChange]);
+
+  // Se tiposServico existir e tipoServicoId estiver vazio, setar valor inicial
+  useEffect(() => {
+    if (!isCustomType && tiposServico.length > 0 && !formData.tipoServicoId) {
+      setFormData(prev => ({ ...prev, tipoServicoId: tiposServico[0].id }));
+    }
+  }, [tiposServico, isCustomType]);
   const selectedCliente = clientes.find(c => c.id === formData.clienteId);
 
   // Update cliente edit data when client selection changes
@@ -278,30 +289,36 @@ export function ContratoForm({
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="tipoServicoId">Tipo de Serviço</Label>
-            {!isCustomType ? <Select value={formData.tipoServicoId} onValueChange={value => handleSelectChange('tipoServicoId', value)}>
+            {!isCustomType ? (
+              <Select value={formData.tipoServicoId} onValueChange={value => handleSelectChange('tipoServicoId', value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o tipo de serviço" />
                 </SelectTrigger>
                 <SelectContent>
-                  {TIPOS_SERVICOS_PADROES.map(tipo => <SelectItem key={tipo} value={tipo}>
-                      {tipo}
-                    </SelectItem>)}
+                  {tiposServico.map(tipo => (
+                    <SelectItem key={tipo.id} value={tipo.id}>
+                      {tipo.nome}
+                    </SelectItem>
+                  ))}
                   <SelectItem value="custom">
                     Outro (digite o tipo de serviço)
                   </SelectItem>
                 </SelectContent>
-              </Select> : <div className="space-y-2">
+              </Select>
+            ) : (
+              <div className="space-y-2">
                 <Input value={customTipoServico} onChange={handleCustomTipoServicoChange} placeholder="Digite o tipo de serviço" />
                 <Button type="button" variant="outline" size="sm" onClick={() => {
-              setIsCustomType(false);
-              setCustomTipoServico('');
-              updateFormData({
-                tipoServicoId: ''
-              });
-            }}>
+                  setIsCustomType(false);
+                  setCustomTipoServico('');
+                  updateFormData({
+                    tipoServicoId: ''
+                  });
+                }}>
                   Voltar para lista padrão
                 </Button>
-              </div>}
+              </div>
+            )}
           </div>
 
           <div>
