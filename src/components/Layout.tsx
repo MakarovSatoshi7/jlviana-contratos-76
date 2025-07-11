@@ -14,7 +14,7 @@ export function Layout() {
                 <div className="text-xs font-display font-light tracking-tight text-primary">
                   JLVIANA
                 </div>
-                <div className="text-sm text-muted-foreground font-xs">
+                <div className="text-sm text-muted-foreground font-light-xs">
                   Consultoria Contábil
                 </div>
               </div>
