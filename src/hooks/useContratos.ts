@@ -64,6 +64,22 @@ export function useAddContrato() {
   
   return useMutation({
     mutationFn: async (contrato: Omit<Contrato, 'id' | 'createdAt'>) => {
+      console.log('Iniciando salvamento do contrato:', contrato);
+      
+      // Verificar se todos os campos obrigatórios estão preenchidos
+      if (!contrato.clienteId) {
+        throw new Error('Cliente é obrigatório');
+      }
+      if (!contrato.tipoServicoId) {
+        throw new Error('Tipo de serviço é obrigatório');
+      }
+      if (!contrato.regimeTributario) {
+        throw new Error('Regime tributário é obrigatório');
+      }
+      if (!contrato.valorMensalidade || contrato.valorMensalidade <= 0) {
+        throw new Error('Valor da mensalidade deve ser maior que zero');
+      }
+      
       const { data, error } = await supabase
         .from('contratos')
         .insert({
@@ -106,16 +122,21 @@ export function useAddContrato() {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao salvar contrato no Supabase:', error);
+        throw error;
+      }
+      
+      console.log('Contrato salvo com sucesso:', data);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contratos'] });
-      toast.success('Contrato gerado com sucesso!');
+      toast.success('Contrato salvo com sucesso!');
     },
     onError: (error) => {
-      console.error('Erro ao gerar contrato:', error);
-      toast.error('Erro ao gerar contrato');
+      console.error('Erro ao salvar contrato:', error);
+      toast.error(`Erro ao salvar contrato: ${error.message}`);
     },
   });
 }

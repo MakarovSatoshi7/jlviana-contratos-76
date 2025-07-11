@@ -10,7 +10,6 @@ import { ContratoForm } from '@/components/ContratoForm';
 import { ContractPreview } from '@/components/ContractPreview';
 import { ContratoPDF } from '@/components/ContratoPDF';
 import { Contrato } from '@/types/contract';
-import { toast } from 'sonner';
 
 export function ContractEditor() {
   const { data: clientes = [] } = useClientes();
@@ -30,11 +29,33 @@ export function ContractEditor() {
 
   const handleSaveContract = (contratoData: Omit<Contrato, 'id' | 'createdAt'>) => {
     console.log('Saving contract:', contratoData);
-    addContratoMutation.mutate(contratoData);
-    toast.success('Contrato salvo com sucesso!');
-
-    // Reset form data
-    setFormData({});
+    
+    // Validar se o tipo de serviço é um UUID válido ou se é um nome customizado
+    let tipoServicoId = contratoData.tipoServicoId;
+    
+    // Se não for um UUID válido (formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(tipoServicoId)) {
+      // Se for um nome customizado, vamos deixar como null e usar o nome no campo apropriado
+      console.log('Tipo de serviço customizado detectado:', tipoServicoId);
+      tipoServicoId = null;
+    }
+    
+    const contratoDataFormatted = {
+      ...contratoData,
+      tipoServicoId: tipoServicoId,
+      // Se não tiver UUID válido, salvamos o nome customizado em um campo texto
+      // Por enquanto, vamos deixar como null para evitar o erro
+    };
+    
+    console.log('Contrato formatado para salvar:', contratoDataFormatted);
+    
+    addContratoMutation.mutate(contratoDataFormatted, {
+      onSuccess: () => {
+        // Reset form data apenas após sucesso confirmado
+        setFormData({});
+      }
+    });
   };
 
   const canGeneratePDF = selectedCliente && formData.valorMensalidade;
