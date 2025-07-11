@@ -62,7 +62,7 @@ export function ContratoPDF({ contrato, cliente, tipoServico }: ContratoPDFProps
       // Check if it's a header/title
       if (section.includes('CONTRATO DE PRESTAÇÃO DE SERVIÇOS CONTÁBEIS')) {
         pdf.setFontSize(16);
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont('helvetica', 'light');
         yPosition = addText(section, 0, yPosition, pageWidth, 'center');
         yPosition += 10;
       } else if (section.includes('CONTRATANTE:') || 
