@@ -198,6 +198,7 @@ const Index = () => {
             ) : (
               <ContratoForm
                 clientes={clientes}
+                tiposServico={tiposServico}
                 onSubmit={handleAddContrato}
               />
             )}
