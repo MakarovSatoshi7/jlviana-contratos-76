@@ -3,12 +3,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileEdit, ZoomIn, ZoomOut, Eye, Settings, Image } from 'lucide-react';
+import { FileEdit, ZoomIn, ZoomOut, Settings, Image } from 'lucide-react';
 import { useClientes } from '@/hooks/useClientes';
 import { useAddContrato } from '@/hooks/useContratos';
 import { useTiposServico } from '@/hooks/useTiposServico';
 import { ContratoForm } from '@/components/ContratoForm';
-import { ContractPreview } from '@/components/ContractPreview';
 import { ContractImagePreview } from '@/components/ContractImagePreview';
 import { ContratoPDF } from '@/components/ContratoPDF';
 import { Contrato } from '@/types/contract';
@@ -25,7 +24,7 @@ export function ContractEditor() {
   const addContratoMutation = useAddContrato();
   const [formData, setFormData] = useState<Partial<Contrato>>({});
   const [zoom, setZoom] = useState(1);
-  const [activeTab, setActiveTab] = useState<'form' | 'preview' | 'images'>('form');
+  const [activeTab, setActiveTab] = useState<'form' | 'modelo'>('form');
 
   console.log('ContractEditor - clientes:', clientes);
 
@@ -105,18 +104,9 @@ export function ContractEditor() {
               Dados
             </Button>
             <Button
-              variant={activeTab === 'preview' ? 'default' : 'ghost'}
+              variant={activeTab === 'modelo' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setActiveTab('preview')}
-              className="flex items-center gap-2"
-            >
-              <Eye className="h-4 w-4" />
-              Preview
-            </Button>
-            <Button
-              variant={activeTab === 'images' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('images')}
+              onClick={() => setActiveTab('modelo')}
               className="flex items-center gap-2"
             >
               <Image className="h-4 w-4" />
@@ -124,29 +114,7 @@ export function ContractEditor() {
             </Button>
           </div>
           
-          {activeTab === 'preview' && (
-            <div className="flex items-center gap-2 border rounded-lg px-3 py-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-              <span className="text-sm font-medium min-w-[60px] text-center">
-                {Math.round(zoom * 100)}%
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setZoom(Math.min(2, zoom + 0.1))}
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-
-          {activeTab === 'images' && (
+          {activeTab === 'modelo' && (
             <div className="flex items-center gap-2 border rounded-lg px-3 py-1">
               <Button
                 variant="outline"
@@ -198,35 +166,7 @@ export function ContractEditor() {
           </Card>
         )}
 
-        {activeTab === 'preview' && (
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Preview do Contrato
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="flex justify-center">
-                <ScrollArea className="h-[calc(100vh-300px)] w-full">
-                  <div
-                    style={{
-                      transform: `scale(${zoom})`,
-                      transformOrigin: 'top center',
-                      minHeight: '100%',
-                      display: 'flex',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <ContractPreview formData={formData} cliente={selectedCliente} />
-                  </div>
-                </ScrollArea>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'images' && (
+        {activeTab === 'modelo' && (
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

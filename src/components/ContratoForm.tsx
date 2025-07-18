@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Cliente, TipoServico, Contrato } from '@/types/contract';
 import { useUpdateCliente } from '@/hooks/useClientes';
 import { toast } from 'sonner';
+
 interface ContratoFormProps {
   clientes: Cliente[];
   tiposServico: TipoServico[];
@@ -15,7 +16,7 @@ interface ContratoFormProps {
   onChange?: (data: Partial<Contrato>) => void;
   showSaveButton?: boolean;
 }
-const TIPOS_SERVICOS_PADROES = ["Contabilidade Completa", "Contabilidade Simplificada", "Contabilidade Consultiva", "BPO Financeiro", "Abertura de Empresa", "Alteração Contratual", "Regularização de Empresa", "Baixa de Empresa", "Assessoria Contábil", "Assessoria Fiscal", "Assessoria Trabalhista", "Planejamento Tributário", "Recuperação de Créditos Tributários", "Gestão da Folha de Pagamento", "Pró-labore", "Gestão do eSocial", "Escrituração Contábil e Fiscal (ECD/ECF)", "Declaração de Imposto de Renda (Pessoa Física e Jurídica)", "Apuração de Impostos", "Enquadramento Tributário (Simples Nacional, Lucro Presumido, Lucro Real)", "Migração de MEI para ME", "Auditoria Contábil", "Perícia Contábil", "Avaliação de Empresas (Valuation)", "Consultoria Financeira", "Emissão de Certificado Digital", "Emissão de Guias de Impostos", "Entrega de Obrigações Acessórias (DCTF, EFD, etc.)"];
+
 const initialFormData: Omit<Contrato, 'id' | 'createdAt'> = {
   clienteId: '',
   tipoServicoId: '',
@@ -53,6 +54,7 @@ const initialFormData: Omit<Contrato, 'id' | 'createdAt'> = {
   contratadaRepresentanteCrc: '2SP023539/O-4',
   contratadaRepresentanteCpf: '123.456.789-00'
 };
+
 export function ContratoForm({
   clientes,
   tiposServico,
@@ -194,15 +196,24 @@ export function ContratoForm({
       setHasClienteChanges(false);
     }
   }, [selectedCliente]);
-  return <form onSubmit={handleSubmit} className="space-y-6">
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Dados do Cliente */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between font-light">
             Dados do Cliente (Contratante)
-            {hasClienteChanges && <Button type="button" onClick={handleSaveClienteChanges} size="sm" variant="outline">
+            {hasClienteChanges && (
+              <Button
+                type="button"
+                onClick={handleSaveClienteChanges}
+                size="sm"
+                variant="outline"
+              >
                 Salvar Alterações do Cliente
-              </Button>}
+              </Button>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -213,14 +224,17 @@ export function ContratoForm({
                 <SelectValue placeholder="Selecione o cliente" />
               </SelectTrigger>
               <SelectContent>
-                {clientes.map(cliente => <SelectItem key={cliente.id} value={cliente.id}>
+                {clientes.map(cliente => (
+                  <SelectItem key={cliente.id} value={cliente.id}>
                     {cliente.razaoSocial}
-                  </SelectItem>)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
-          {selectedCliente && <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+          {selectedCliente && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
               <div>
                 <Label>Razão Social</Label>
                 <div className="text-sm text-muted-foreground">{selectedCliente.razaoSocial}</div>
@@ -228,56 +242,45 @@ export function ContratoForm({
               
               <div>
                 <Label htmlFor="cnpj-edit">CNPJ</Label>
-                <Input id="cnpj-edit" value={clienteEditData.cnpj || ''} onChange={e => handleClienteChange('cnpj', e.target.value)} className="mt-1" />
+                <Input
+                  id="cnpj-edit"
+                  value={clienteEditData.cnpj || ''}
+                  onChange={e => handleClienteChange('cnpj', e.target.value)}
+                  className="mt-1"
+                />
               </div>
               
               <div className="md:col-span-2">
                 <Label htmlFor="endereco-edit">Endereço</Label>
-                <Input id="endereco-edit" value={clienteEditData.endereco || ''} onChange={e => handleClienteChange('endereco', e.target.value)} className="mt-1" />
+                <Input
+                  id="endereco-edit"
+                  value={clienteEditData.endereco || ''}
+                  onChange={e => handleClienteChange('endereco', e.target.value)}
+                  className="mt-1"
+                />
               </div>
               
               <div>
                 <Label htmlFor="representante-nome-edit">Representante Legal</Label>
-                <Input id="representante-nome-edit" value={clienteEditData.representanteNome || ''} onChange={e => handleClienteChange('representanteNome', e.target.value)} className="mt-1" />
-              </div>
-              
-              <div>
-                <Label htmlFor="representante-nacionalidade-edit">Nacionalidade</Label>
-                <Input id="representante-nacionalidade-edit" value={clienteEditData.representanteNacionalidade || ''} onChange={e => handleClienteChange('representanteNacionalidade', e.target.value)} className="mt-1" />
-              </div>
-              
-              <div>
-                <Label htmlFor="representante-estado-civil-edit">Estado Civil</Label>
-                <Input id="representante-estado-civil-edit" value={clienteEditData.representanteEstadoCivil || ''} onChange={e => handleClienteChange('representanteEstadoCivil', e.target.value)} className="mt-1" />
-              </div>
-              
-              <div>
-                <Label htmlFor="representante-profissao-edit">Profissão</Label>
-                <Input id="representante-profissao-edit" value={clienteEditData.representanteProfissao || ''} onChange={e => handleClienteChange('representanteProfissao', e.target.value)} className="mt-1" />
+                <Input
+                  id="representante-nome-edit"
+                  value={clienteEditData.representanteNome || ''}
+                  onChange={e => handleClienteChange('representanteNome', e.target.value)}
+                  className="mt-1"
+                />
               </div>
               
               <div>
                 <Label htmlFor="representante-cpf-edit">CPF</Label>
-                <Input id="representante-cpf-edit" value={clienteEditData.representanteCpf || ''} onChange={e => handleClienteChange('representanteCpf', e.target.value)} className="mt-1" />
+                <Input
+                  id="representante-cpf-edit"
+                  value={clienteEditData.representanteCpf || ''}
+                  onChange={e => handleClienteChange('representanteCpf', e.target.value)}
+                  className="mt-1"
+                />
               </div>
-              
-              <div>
-                <Label htmlFor="representante-rg-edit">RG</Label>
-                <Input id="representante-rg-edit" value={clienteEditData.representanteRg || ''} onChange={e => handleClienteChange('representanteRg', e.target.value)} className="mt-1" />
-              </div>
-              
-              <div>
-                <Label htmlFor="representante-orgao-emissor-edit">Órgão Emissor</Label>
-                <Input id="representante-orgao-emissor-edit" value={clienteEditData.representanteOrgaoEmissor || ''} onChange={e => handleClienteChange('representanteOrgaoEmissor', e.target.value)} className="mt-1" />
-              </div>
-            </div>}
-
-          {formData.clienteId && !selectedCliente?.representanteNome && <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                ⚠️ O cliente selecionado não possui todas as informações de representante legal necessárias para gerar o contrato. 
-                Por favor, complete as informações acima e clique em "Salvar Alterações do Cliente".
-              </p>
-            </div>}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -307,14 +310,21 @@ export function ContratoForm({
               </Select>
             ) : (
               <div className="space-y-2">
-                <Input value={customTipoServico} onChange={handleCustomTipoServicoChange} placeholder="Digite o tipo de serviço" />
-                <Button type="button" variant="outline" size="sm" onClick={() => {
-                  setIsCustomType(false);
-                  setCustomTipoServico('');
-                  updateFormData({
-                    tipoServicoId: ''
-                  });
-                }}>
+                <Input
+                  value={customTipoServico}
+                  onChange={handleCustomTipoServicoChange}
+                  placeholder="Digite o tipo de serviço"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsCustomType(false);
+                    setCustomTipoServico('');
+                    updateFormData({ tipoServicoId: '' });
+                  }}
+                >
                   Voltar para lista padrão
                 </Button>
               </div>
@@ -337,150 +347,59 @@ export function ContratoForm({
         </CardContent>
       </Card>
 
-      {/* Parâmetros do Contrato */}
+      {/* Valores e Pagamento */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-light">Parâmetros do Contrato</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="quantidadeEstabelecimentos">
-                Quantidade de Estabelecimentos
-              </Label>
-              <Input type="number" id="quantidadeEstabelecimentos" name="quantidadeEstabelecimentos" value={formData.quantidadeEstabelecimentos} onChange={handleNumberChange} />
-            </div>
-
-            <div>
-              <Label htmlFor="quantidadeContasBancarias">
-                Quantidade de Contas Bancárias
-              </Label>
-              <Input type="number" id="quantidadeContasBancarias" name="quantidadeContasBancarias" value={formData.quantidadeContasBancarias} onChange={handleNumberChange} />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="volumeLancamentosContabeis">
-              Volume de Lançamentos Contábeis
-            </Label>
-            <Input type="text" id="volumeLancamentosContabeis" name="volumeLancamentosContabeis" value={formData.volumeLancamentosContabeis} onChange={handleChange} />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="numeroNotasServicos">Número de Notas de Serviços</Label>
-              <Input type="text" id="numeroNotasServicos" name="numeroNotasServicos" value={formData.numeroNotasServicos} onChange={handleChange} />
-            </div>
-
-            <div>
-              <Label htmlFor="numeroNotasEntradaSaida">
-                Número de Notas de Entrada/Saída
-              </Label>
-              <Input type="text" id="numeroNotasEntradaSaida" name="numeroNotasEntradaSaida" value={formData.numeroNotasEntradaSaida} onChange={handleChange} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="quantidadeEmpregadosClt">
-                Quantidade de Empregados CLT
-              </Label>
-              <Input type="number" id="quantidadeEmpregadosClt" name="quantidadeEmpregadosClt" value={formData.quantidadeEmpregadosClt} onChange={handleNumberChange} />
-            </div>
-
-            <div>
-              <Label htmlFor="quantidadeSocios">Quantidade de Sócios</Label>
-              <Input type="number" id="quantidadeSocios" name="quantidadeSocios" value={formData.quantidadeSocios} onChange={handleNumberChange} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Dados Financeiros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-light">Dados Financeiros</CardTitle>
+          <CardTitle className="font-light">Valores e Pagamento</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="valorMensalidade">Valor Mensalidade</Label>
-            <Input type="number" id="valorMensalidade" name="valorMensalidade" value={formData.valorMensalidade} onChange={handleNumberChange} />
+            <Label htmlFor="valorMensalidade">Valor Mensal</Label>
+            <Input
+              type="number"
+              id="valorMensalidade"
+              name="valorMensalidade"
+              value={formData.valorMensalidade}
+              onChange={handleNumberChange}
+            />
           </div>
 
           <div>
-            <Label htmlFor="diaVencimento">Dia de Vencimento</Label>
-            <Select onValueChange={value => handleSelectChange('diaVencimento', value)}>
+            <Label htmlFor="diaVencimento">Dia de Pagamento</Label>
+            <Select value={formData.diaVencimento?.toString()} onValueChange={value => handleSelectChange('diaVencimento', value)}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione o dia" />
               </SelectTrigger>
               <SelectContent>
-                {Array.from({
-                length: 28
-              }, (_, i) => i + 1).map(day => <SelectItem key={day} value={day.toString()}>
+                {Array.from({ length: 28 }, (_, i) => i + 1).map(day => (
+                  <SelectItem key={day} value={day.toString()}>
                     {day}
-                  </SelectItem>)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label htmlFor="valor13aMensalidade">Valor 13ª Mensalidade</Label>
-            <Select onValueChange={value => handleSelectChange('valor13aMensalidade', value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione o valor" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Integral">Integral</SelectItem>
-                <SelectItem value="Proporcional">Proporcional</SelectItem>
-                <SelectItem value="Não Cobra">Não Cobra</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="percentualReajusteAnual">
-              Percentual de Reajuste Anual
-            </Label>
-            <Input type="number" id="percentualReajusteAnual" name="percentualReajusteAnual" value={formData.percentualReajusteAnual} onChange={handleNumberChange} />
-          </div>
-
-          <div>
-            <Label htmlFor="cobraAlteracaoContrato">Cobra Alteração Contrato</Label>
-            <Select onValueChange={value => handleSelectChange('cobraAlteracaoContrato', value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Sim">Sim</SelectItem>
-                <SelectItem value="Não">Não</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="cobraIrpfSocios">Cobra IRPF dos Sócios</Label>
-            <Select onValueChange={value => handleSelectChange('cobraIrpfSocios', value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Sim">Sim</SelectItem>
-                <SelectItem value="Não">Não</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="numeroProposta">Número da Proposta</Label>
+            <Input
+              type="text"
+              id="numeroProposta"
+              name="numeroProposta"
+              value={formData.numeroProposta || ''}
+              onChange={handleChange}
+            />
           </div>
 
           <div>
             <Label htmlFor="formaPagamento">Forma de Pagamento</Label>
-            <Select onValueChange={value => handleSelectChange('formaPagamento', value)}>
+            <Select value={formData.formaPagamento} onValueChange={value => handleSelectChange('formaPagamento', value)}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione a forma" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Boleto Bancário">Boleto Bancário</SelectItem>
-                <SelectItem value="Transferência Bancária">
-                  Transferência Bancária
-                </SelectItem>
+                <SelectItem value="Transferência Bancária">Transferência Bancária</SelectItem>
                 <SelectItem value="PIX">PIX</SelectItem>
               </SelectContent>
             </Select>
@@ -488,138 +407,472 @@ export function ContratoForm({
         </CardContent>
       </Card>
 
-      {/* Dados Contratuais */}
+      {/* Vigência e Dados Contratuais */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-light">Dados Contratuais</CardTitle>
+          <CardTitle className="font-light">Vigência e Dados Contratuais</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="dataInicioContrato">Data de Início do Contrato</Label>
-            <Input type="date" id="dataInicioContrato" name="dataInicioContrato" value={new Date(formData.dataInicioContrato).toISOString().split('T')[0]} onChange={handleDateChange} />
+            <Label htmlFor="dataInicioContrato">Data de Início</Label>
+            <Input
+              type="date"
+              id="dataInicioContrato"
+              name="dataInicioContrato"
+              value={new Date(formData.dataInicioContrato).toISOString().split('T')[0]}
+              onChange={handleDateChange}
+            />
           </div>
 
           <div>
             <Label htmlFor="prazoVigencia">Prazo de Vigência (meses)</Label>
-            <Input type="number" id="prazoVigencia" name="prazoVigencia" value={formData.prazoVigencia} onChange={handleNumberChange} />
+            <Input
+              type="number"
+              id="prazoVigencia"
+              name="prazoVigencia"
+              value={formData.prazoVigencia}
+              onChange={handleNumberChange}
+            />
           </div>
 
           <div>
-            <Label htmlFor="preAvisoRescisao">Pré-Aviso de Rescisão (dias)</Label>
-            <Input type="number" id="preAvisoRescisao" name="preAvisoRescisao" value={formData.preAvisoRescisao} onChange={handleNumberChange} />
+            <Label htmlFor="diasAviso">Dias de Aviso (Rescisão)</Label>
+            <Input
+              type="number"
+              id="diasAviso"
+              name="diasAviso"
+              value={formData.preAvisoRescisao || 30}
+              onChange={handleNumberChange}
+            />
           </div>
 
           <div>
-            <Label htmlFor="multaRescisioriaPercentual">
-              Multa Rescisória (percentual)
-            </Label>
-            <Input type="number" id="multaRescisioriaPercentual" name="multaRescisioriaPercentual" value={formData.multaRescisioriaPercentual} onChange={handleNumberChange} />
+            <Label htmlFor="percentualMultaRescisao">Percentual Multa Rescisão (%)</Label>
+            <Input
+              type="number"
+              id="percentualMultaRescisao"
+              name="percentualMultaRescisao"
+              value={formData.multaRescisioriaPercentual || 10}
+              onChange={handleNumberChange}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* Dados Adicionais */}
+      {/* Confidencialidade e LGPD */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-light">Dados Adicionais</CardTitle>
+          <CardTitle className="font-light">Confidencialidade e LGPD</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
+            <Label htmlFor="prazoConfidencialidade">Prazo Confidencialidade (anos)</Label>
+            <Input
+              type="number"
+              id="prazoConfidencialidade"
+              name="prazoConfidencialidade"
+              value={formData.prazoConfidencialidade || 5}
+              onChange={handleNumberChange}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="diasIncidente">Dias para Notificar Incidente</Label>
+            <Input
+              type="number"
+              id="diasIncidente"
+              name="diasIncidente"
+              value={formData.diasIncidente || 72}
+              onChange={handleNumberChange}
+            />
+          </div>
+
+          <div>
             <Label htmlFor="dpoNome">Nome do DPO</Label>
-            <Input type="text" id="dpoNome" name="dpoNome" value={formData.dpoNome} onChange={handleChange} />
+            <Input
+              type="text"
+              id="dpoNome"
+              name="dpoNome"
+              value={formData.dpoNome}
+              onChange={handleChange}
+            />
           </div>
 
           <div>
             <Label htmlFor="dpoEmail">Email do DPO</Label>
-            <Input type="email" id="dpoEmail" name="dpoEmail" value={formData.dpoEmail} onChange={handleChange} />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="testemunha1Nome">Testemunha 1 - Nome</Label>
-              <Input type="text" id="testemunha1Nome" name="testemunha1Nome" value={formData.testemunha1Nome} onChange={handleChange} />
-            </div>
-
-            <div>
-              <Label htmlFor="testemunha1Rg">Testemunha 1 - RG</Label>
-              <Input type="text" id="testemunha1Rg" name="testemunha1Rg" value={formData.testemunha1Rg} onChange={handleChange} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="testemunha2Nome">Testemunha 2 - Nome</Label>
-              <Input type="text" id="testemunha2Nome" name="testemunha2Nome" value={formData.testemunha2Nome} onChange={handleChange} />
-            </div>
-
-            <div>
-              <Label htmlFor="testemunha2Rg">Testemunha 2 - RG</Label>
-              <Input type="text" id="testemunha2Rg" name="testemunha2Rg" value={formData.testemunha2Rg} onChange={handleChange} />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="anoBase">Ano Base</Label>
-            <Input type="text" id="anoBase" name="anoBase" value={formData.anoBase} onChange={handleChange} />
-          </div>
-
-          <div>
-            <Label htmlFor="sistemaGestao">Sistema de Gestão</Label>
-            <Input type="text" id="sistemaGestao" name="sistemaGestao" value={formData.sistemaGestao} onChange={handleChange} />
+            <Input
+              type="email"
+              id="dpoEmail"
+              name="dpoEmail"
+              value={formData.dpoEmail}
+              onChange={handleChange}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* Dados da Contratada */}
+      {/* Dimensionamento - Obrigatório */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-light">Dados da Contratada</CardTitle>
+          <CardTitle className="font-light">Dimensionamento - Obrigatório</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="quantidadeEmpregadosClt">Qtd Funcionários</Label>
+              <Input
+                type="number"
+                id="quantidadeEmpregadosClt"
+                name="quantidadeEmpregadosClt"
+                value={formData.quantidadeEmpregadosClt}
+                onChange={handleNumberChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="quantidadeSocios">Qtd Sócios</Label>
+              <Input
+                type="number"
+                id="quantidadeSocios"
+                name="quantidadeSocios"
+                value={formData.quantidadeSocios}
+                onChange={handleNumberChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="quantidadeContasBancarias">Qtd Contas Correntes</Label>
+              <Input
+                type="number"
+                id="quantidadeContasBancarias"
+                name="quantidadeContasBancarias"
+                value={formData.quantidadeContasBancarias}
+                onChange={handleNumberChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="quantidadeEstabelecimentos">Qtd Estabelecimentos</Label>
+              <Input
+                type="number"
+                id="quantidadeEstabelecimentos"
+                name="quantidadeEstabelecimentos"
+                value={formData.quantidadeEstabelecimentos}
+                onChange={handleNumberChange}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dimensionamento - Fiscal */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-light">Dimensionamento - Fiscal</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="notasEmitidasMedias">Notas Emitidas Médias</Label>
+              <Input
+                type="text"
+                id="notasEmitidasMedias"
+                name="notasEmitidasMedias"
+                value={formData.numeroNotasServicos || ''}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="notasRecebidasMedias">Notas Recebidas Médias</Label>
+              <Input
+                type="text"
+                id="notasRecebidasMedias"
+                name="notasRecebidasMedias"
+                value={formData.numeroNotasEntradaSaida || ''}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="qtdCodigosServico">Qtd Códigos Serviço</Label>
+              <Input
+                type="text"
+                id="qtdCodigosServico"
+                name="qtdCodigosServico"
+                value={formData.qtdCodigosServico || ''}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="substTributaria">Subst Tributária</Label>
+              <Select value={formData.substTributaria || ''} onValueChange={value => handleSelectChange('substTributaria', value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Sim">Sim</SelectItem>
+                  <SelectItem value="Não">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="comercioInterestadual">Comércio Interestadual</Label>
+              <Select value={formData.comercioInterestadual || ''} onValueChange={value => handleSelectChange('comercioInterestadual', value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Sim">Sim</SelectItem>
+                  <SelectItem value="Não">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dimensionamento - Contábil */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-light">Dimensionamento - Contábil</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="contratadaRepresentanteNome">
-              Contratada - Representante Nome
-            </Label>
-            <Input type="text" id="contratadaRepresentanteNome" name="contratadaRepresentanteNome" value={formData.contratadaRepresentanteNome} onChange={handleChange} />
+            <Label htmlFor="volumeLancamentosContabeis">Volume Lançamentos</Label>
+            <Input
+              type="text"
+              id="volumeLancamentosContabeis"
+              name="volumeLancamentosContabeis"
+              value={formData.volumeLancamentosContabeis}
+              onChange={handleChange}
+            />
           </div>
 
           <div>
-            <Label htmlFor="contratadaRepresentanteNacionalidade">
-              Contratada - Representante Nacionalidade
-            </Label>
-            <Input type="text" id="contratadaRepresentanteNacionalidade" name="contratadaRepresentanteNacionalidade" value={formData.contratadaRepresentanteNacionalidade} onChange={handleChange} />
+            <Label htmlFor="frequenciaDemonstracoes">Frequência Demonstrações</Label>
+            <Select value={formData.frequenciaDemonstracoes || ''} onValueChange={value => handleSelectChange('frequenciaDemonstracoes', value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Mensal">Mensal</SelectItem>
+                <SelectItem value="Trimestral">Trimestral</SelectItem>
+                <SelectItem value="Anual">Anual</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
-            <Label htmlFor="contratadaRepresentanteEstadoCivil">
-              Contratada - Representante Estado Civil
-            </Label>
-            <Input type="text" id="contratadaRepresentanteEstadoCivil" name="contratadaRepresentanteEstadoCivil" value={formData.contratadaRepresentanteEstadoCivil} onChange={handleChange} />
+            <Label htmlFor="necessidadeRelatorios">Necessidade Relatórios</Label>
+            <Select value={formData.necessidadeRelatorios || ''} onValueChange={value => handleSelectChange('necessidadeRelatorios', value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Básicos">Básicos</SelectItem>
+                <SelectItem value="Intermediários">Intermediários</SelectItem>
+                <SelectItem value="Avançados">Avançados</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
-            <Label htmlFor="contratadaRepresentanteProfissao">
-              Contratada - Representante Profissão
-            </Label>
-            <Input type="text" id="contratadaRepresentanteProfissao" name="contratadaRepresentanteProfissao" value={formData.contratadaRepresentanteProfissao} onChange={handleChange} />
-          </div>
-
-          <div>
-            <Label htmlFor="contratadaRepresentanteCrc">
-              Contratada - Representante CRC
-            </Label>
-            <Input type="text" id="contratadaRepresentanteCrc" name="contratadaRepresentanteCrc" value={formData.contratadaRepresentanteCrc} onChange={handleChange} />
-          </div>
-
-          <div>
-            <Label htmlFor="contratadaRepresentanteCpf">
-              Contratada - Representante CPF
-            </Label>
-            <Input type="text" id="contratadaRepresentanteCpf" name="contratadaRepresentanteCpf" value={formData.contratadaRepresentanteCpf} onChange={handleChange} />
+            <Label htmlFor="controlesInternos">Controles Internos</Label>
+            <Select value={formData.controlesInternos || ''} onValueChange={value => handleSelectChange('controlesInternos', value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Sim">Sim</SelectItem>
+                <SelectItem value="Não">Não</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
-      {showSaveButton && <Button type="submit" className="w-full">Salvar Contrato</Button>}
-    </form>;
+      {/* Dimensionamento - Departamento Pessoal */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-light">Dimensionamento - Departamento Pessoal</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="admissoesMes">Admissões/Mês</Label>
+              <Input
+                type="number"
+                id="admissoesMes"
+                name="admissoesMes"
+                value={formData.admissoesMes || 0}
+                onChange={handleNumberChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="rescisoesMes">Rescisões/Mês</Label>
+              <Input
+                type="number"
+                id="rescisoesMes"
+                name="rescisoesMes"
+                value={formData.rescisoesMes || 0}
+                onChange={handleNumberChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="qtdEstagiarios">Qtd Estagiários</Label>
+              <Input
+                type="number"
+                id="qtdEstagiarios"
+                name="qtdEstagiarios"
+                value={formData.qtdEstagiarios || 0}
+                onChange={handleNumberChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="inclusaoRPA">Inclusão RPA</Label>
+              <Select value={formData.inclusaoRPA || ''} onValueChange={value => handleSelectChange('inclusaoRPA', value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Sim">Sim</SelectItem>
+                  <SelectItem value="Não">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="feriasProgramadas">Férias Programadas</Label>
+              <Select value={formData.feriasProgramadas || ''} onValueChange={value => handleSelectChange('feriasProgramadas', value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Sim">Sim</SelectItem>
+                  <SelectItem value="Não">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Outras Variáveis */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-light">Outras Variáveis</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="qtdCNPJs">Qtd CNPJs</Label>
+              <Input
+                type="number"
+                id="qtdCNPJs"
+                name="qtdCNPJs"
+                value={formData.qtdCNPJs || 1}
+                onChange={handleNumberChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="localizacaoFiliais">Localização Filiais</Label>
+              <Input
+                type="text"
+                id="localizacaoFiliais"
+                name="localizacaoFiliais"
+                value={formData.localizacaoFiliais || ''}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="relatoriosPersonalizados">Relatórios Personalizados</Label>
+              <Select value={formData.relatoriosPersonalizados || ''} onValueChange={value => handleSelectChange('relatoriosPersonalizados', value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Sim">Sim</SelectItem>
+                  <SelectItem value="Não">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="freqReunioes">Freq Reuniões</Label>
+              <Select value={formData.freqReunioes || ''} onValueChange={value => handleSelectChange('freqReunioes', value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Semanal">Semanal</SelectItem>
+                  <SelectItem value="Quinzenal">Quinzenal</SelectItem>
+                  <SelectItem value="Mensal">Mensal</SelectItem>
+                  <SelectItem value="Trimestral">Trimestral</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="atendimentoPresencial">Atendimento Presencial</Label>
+              <Select value={formData.atendimentoPresencial || ''} onValueChange={value => handleSelectChange('atendimentoPresencial', value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Sim">Sim</SelectItem>
+                  <SelectItem value="Não">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="atendimentoEmergencial">Atendimento Emergencial</Label>
+              <Select value={formData.atendimentoEmergencial || ''} onValueChange={value => handleSelectChange('atendimentoEmergencial', value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Sim">Sim</SelectItem>
+                  <SelectItem value="Não">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Auditoria */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-light">Auditoria</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="diasAvisoAuditoria">Dias Aviso Auditoria</Label>
+            <Input
+              type="number"
+              id="diasAvisoAuditoria"
+              name="diasAvisoAuditoria"
+              value={formData.diasAvisoAuditoria || 30}
+              onChange={handleNumberChange}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {showSaveButton && (
+        <Button type="submit" className="w-full">
+          Salvar Contrato
+        </Button>
+      )}
+    </form>
+  );
 }
