@@ -13,27 +13,51 @@ export function ContractPreview({ formData, cliente, tipoServico }: ContractPrev
   const processedContract = replaceVariables(contractTemplate, templateData);
 
   return (
-    <div className="w-full bg-white p-8 border rounded-lg shadow-sm">
+    <div className="w-full max-w-4xl bg-white p-8 border rounded-lg shadow-sm mx-auto">
       <div className="prose prose-sm max-w-none">
-        <div className="text-center mb-8">
-          <h1 className="text-xl font-bold text-gray-900 mb-2">
-            CONTRATO DE PRESTAÇÃO DE SERVIÇOS CONTÁBEIS
-          </h1>
-        </div>
-        
-        <div className="space-y-6 text-sm leading-relaxed text-gray-800">
+        <div className="space-y-4 text-sm leading-relaxed text-gray-800">
           {processedContract.split('\n\n').map((paragraph, index) => {
             if (paragraph.trim() === '') return null;
             
-            // Check if it's a header/title
-            if (paragraph.includes('CONTRATANTE:') || 
-                paragraph.includes('CONTRATADA:') || 
-                paragraph.startsWith('CLÁUSULA') ||
-                paragraph.includes('ANEXO I')) {
+            // Title styling
+            if (paragraph.includes('CONTRATO DE PRESTAÇÃO DE SERVIÇOS CONTÁBEIS') && 
+                paragraph.length < 100) {
+              return (
+                <div key={index} className="text-center mb-8">
+                  <h1 className="text-xl font-bold text-gray-900 mb-4">
+                    {paragraph.trim()}
+                  </h1>
+                </div>
+              );
+            }
+            
+            // Section headers (CONTRATANTE, CONTRATADA, CLÁUSULAS)
+            if (paragraph.includes('**CONTRATANTE:**') || 
+                paragraph.includes('**CONTRATADA:**') || 
+                paragraph.startsWith('**CLÁUSULA') ||
+                paragraph.includes('**ANEXO I') ||
+                paragraph.includes('**TESTEMUNHAS:**')) {
               return (
                 <div key={index} className="font-bold text-gray-900 mt-6 mb-3">
+                  {paragraph.split('\n').map((line, lineIndex) => {
+                    // Remove markdown bold markers and format
+                    const cleanLine = line.replace(/\*\*/g, '');
+                    return (
+                      <div key={lineIndex} className={lineIndex > 0 ? 'font-normal mt-2' : ''}>
+                        {cleanLine}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            }
+            
+            // Subsection headers (numbered items within clauses)
+            if (paragraph.match(/^\d+\.\d+\./)) {
+              return (
+                <div key={index} className="font-semibold text-gray-900 mt-4 mb-2">
                   {paragraph.split('\n').map((line, lineIndex) => (
-                    <div key={lineIndex} className={lineIndex > 0 ? 'font-normal mt-2' : ''}>
+                    <div key={lineIndex} className={lineIndex > 0 ? 'font-normal mt-1' : ''}>
                       {line}
                     </div>
                   ))}
@@ -41,12 +65,59 @@ export function ContractPreview({ formData, cliente, tipoServico }: ContractPrev
               );
             }
             
-            // Regular paragraph
+            // Lists with bullet points
+            if (paragraph.includes('•')) {
+              return (
+                <div key={index} className="mb-4">
+                  {paragraph.split('\n').map((line, lineIndex) => {
+                    if (line.trim().startsWith('•')) {
+                      return (
+                        <div key={lineIndex} className="ml-4 mb-1">
+                          {line.trim()}
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={lineIndex} className={lineIndex > 0 ? 'mt-1' : ''}>
+                        {line}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            }
+            
+            // Signature lines
+            if (paragraph.includes('_______')) {
+              return (
+                <div key={index} className="mt-8 mb-4">
+                  {paragraph.split('\n').map((line, lineIndex) => {
+                    if (line.includes('_______')) {
+                      return (
+                        <div key={lineIndex} className="mb-8">
+                          <div className="border-b border-gray-400 w-64 mb-2"></div>
+                          <div className="text-sm font-medium">
+                            {line.replace(/_+/g, '').trim()}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={lineIndex} className={lineIndex > 0 ? 'mt-1' : ''}>
+                        {line}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            }
+            
+            // Regular paragraphs
             return (
-              <div key={index} className="mb-4">
+              <div key={index} className="mb-4 text-justify">
                 {paragraph.split('\n').map((line, lineIndex) => (
                   <div key={lineIndex} className={lineIndex > 0 ? 'mt-1' : ''}>
-                    {line}
+                    {line.replace(/\*\*/g, '')} {/* Remove markdown bold markers */}
                   </div>
                 ))}
               </div>
